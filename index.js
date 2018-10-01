@@ -2,7 +2,7 @@ const Koa = require("koa");
 const Router = require("koa-router");
 const BodyParser = require("koa-bodyparser");
 const logger = require('koa-logger');
-require("./mongo")(app);
+const mongo = require("./mongo");
 const ObjectID = require("mongodb").ObjectID;
 const jwt = require("./jwt");
 
@@ -11,7 +11,8 @@ const router = new Router();
 const securedRouter = new Router();
 
 const app = new Koa();
-const router = new Router();
+
+mongo(app);
 
 // Use the bodyparser middlware
 app.use(BodyParser());
@@ -87,6 +88,30 @@ securedRouter.put("/people/:id", async (ctx) => {
 
 // Delete one
 securedRouter.delete("/people/:id", async (ctx) => {
+    let documentQuery = {"_id": ObjectID(ctx.params.id)}; // Used to find the document
+    ctx.body = await ctx.app.people.deleteOne(documentQuery);
+});
+
+
+// Create new book
+securedRouter.post("/book", async (ctx) => {
+    ctx.body = await ctx.app.people.insert(ctx.request.body);
+});
+
+// Get one
+securedRouter.get("/book/:id", async (ctx) => {
+    ctx.body = await ctx.app.people.findOne({"_id": ObjectID(ctx.params.id)});
+});
+
+// Update one
+securedRouter.put("/book/:id", async (ctx) => {
+    let documentQuery = {"_id": ObjectID(ctx.params.id)}; // Used to find the document
+    let valuesToUpdate = ctx.request.body;
+    ctx.body = await ctx.app.people.updateOne(documentQuery, valuesToUpdate);
+});
+
+// Delete one
+securedRouter.delete("/book/:id", async (ctx) => {
     let documentQuery = {"_id": ObjectID(ctx.params.id)}; // Used to find the document
     ctx.body = await ctx.app.people.deleteOne(documentQuery);
 });
